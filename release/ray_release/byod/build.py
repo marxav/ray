@@ -124,11 +124,12 @@ def build_anyscale_base_byod_images(tests: List[Test]) -> None:
         and int(time.time()) - start < BASE_IMAGE_WAIT_TIMEOUT
     ):
         for byod_image, test in to_be_built.items():
-            byod_requirements = (
-                f"{REQUIREMENTS_BYOD}_{test.get('python', PYTHON_VERSION)}.txt"
-                if test.get_byod_type() == "cpu"
-                else f"{REQUIREMENTS_ML_BYOD}_{test.get('python', PYTHON_VERSION)}.txt"
-            )
+            py_version = test.get("python", PYTHON_VERSION)
+            if test.use_byod_ml_image():
+                byod_requirements = f"{REQUIREMENTS_ML_BYOD}_{py_version}.txt"
+            else:
+                byod_requirements = f"{REQUIREMENTS_BYOD}_{py_version}.txt"
+
             if _byod_image_exist(test):
                 logger.info(f"Image {byod_image} already exists")
                 built.add(byod_image)
@@ -210,7 +211,7 @@ def _validate_and_push(byod_image: str) -> None:
         assert (
             docker_ray_commit == expected_ray_commit
         ), f"Expected ray commit {expected_ray_commit}, found {docker_ray_commit}"
-    logger.info(f"Pushing image to ECR: {byod_image}")
+    logger.info(f"Pushing image to registry: {byod_image}")
     subprocess.check_call(
         ["docker", "push", byod_image],
         stdout=sys.stderr,
