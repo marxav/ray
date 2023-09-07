@@ -4,9 +4,11 @@ from ci.ray_ci.container import Container, _DOCKER_ECR_REPO
 from ci.ray_ci.builder_container import PYTHON_VERSIONS
 from ci.ray_ci.utils import docker_pull
 
+PLATFORM = ["cu118"]
+
 
 class DockerContainer(Container):
-    def __init__(self, python_version: str) -> None:
+    def __init__(self, python_version: str, platform: str, image_type: str) -> None:
         super().__init__(
             "forge",
             volumes=[
@@ -15,10 +17,13 @@ class DockerContainer(Container):
             ],
         )
         self.python_version = python_version
+        self.platform = platform
+        self.image_type = image_type
 
     def run(self) -> None:
         base_image = (
-            f"{_DOCKER_ECR_REPO}:{os.environ['RAYCI_BUILD_ID']}-raypy38cu118base"
+            f"{_DOCKER_ECR_REPO}:{os.environ['RAYCI_BUILD_ID']}"
+            f"-{self.image_type}{self.python_version}{self.platform}base"
         )
         docker_pull(base_image)
         wheel_name = (
@@ -32,9 +37,8 @@ class DockerContainer(Container):
             else "requirements_compiled.txt"
         )
         ray_image = (
-            "rayproject/ray:"
-            f"{os.environ['BUILDKITE_COMMIT'][:6]}-"
-            f"{self.python_version}-cu118"
+            f"rayproject/{self.image_type}:{os.environ['BUILDKITE_COMMIT'][:6]}-"
+            f"{self.python_version}-{self.platform}"
         )
         self.run_script(
             [

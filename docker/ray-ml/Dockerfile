@@ -1,22 +1,28 @@
 ARG BASE_IMAGE
-FROM rayproject/ray:nightly"$BASE_IMAGE"
+ARG FROM=rayproject/ray:nightly"$BASE_IMAGE"
+FROM "$FROM"
+
+ARG REQUIREMENT_PATH=.
+ARG DOCKER_REQUIREMENT_PATH=.
+ARG ML_REQUIREMENT_PATH=.
+ARG SCRIPT_PATH=.
 
 # We have to uninstall wrapt this way for Tensorflow compatibility
-COPY requirements.txt ./
-COPY requirements_compiled.txt ./
-COPY dl-cpu-requirements.txt ./
-COPY dl-gpu-requirements.txt ./
-COPY ray-docker-requirements.txt ./
-COPY core-requirements.txt ./
-COPY data-requirements.txt ./
-COPY rllib-requirements.txt ./
-COPY rllib-test-requirements.txt ./
-COPY tune-requirements.txt ./
-COPY tune-test-requirements.txt ./
-COPY train-requirements.txt ./
-COPY train-test-requirements.txt ./
+COPY ${REQUIREMENT_PATH}/requirements.txt ./
+COPY ${REQUIREMENT_PATH}/requirements_compiled.txt ./
+COPY ${ML_REQUIREMENT_PATH}/dl-cpu-requirements.txt ./
+COPY ${ML_REQUIREMENT_PATH}/dl-gpu-requirements.txt ./
+COPY ${DOCKER_REQUIREMENT_PATH}/ray-docker-requirements.txt ./
+COPY ${ML_REQUIREMENT_PATH}/core-requirements.txt ./
+COPY ${ML_REQUIREMENT_PATH}/data-requirements.txt ./
+COPY ${ML_REQUIREMENT_PATH}/rllib-requirements.txt ./
+COPY ${ML_REQUIREMENT_PATH}/rllib-test-requirements.txt ./
+COPY ${ML_REQUIREMENT_PATH}/tune-requirements.txt ./
+COPY ${ML_REQUIREMENT_PATH}/tune-test-requirements.txt ./
+COPY ${ML_REQUIREMENT_PATH}/train-requirements.txt ./
+COPY ${ML_REQUIREMENT_PATH}/train-test-requirements.txt ./
 
-COPY install-ml-docker-requirements.sh ./
+COPY ${SCRIPT_PATH}/install-ml-docker-requirements.sh ./
 
 RUN sudo chmod +x install-ml-docker-requirements.sh && ./install-ml-docker-requirements.sh
 

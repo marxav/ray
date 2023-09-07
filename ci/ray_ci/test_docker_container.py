@@ -28,7 +28,7 @@ def test_run() -> None:
     ), mock.patch(
         "subprocess.check_output", side_effect=_mock_check_output
     ):
-        container = DockerContainer("py38")
+        container = DockerContainer("py38", "cu118", "ray")
         container.run()
 
 
